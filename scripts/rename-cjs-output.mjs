@@ -21,3 +21,28 @@ for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
     fs.renameSync(mapPath, `${cjsPath}.map`);
   }
 }
+
+for (const entry of fs.readdirSync(path.resolve("dist"), {
+  withFileTypes: true,
+})) {
+  if (!entry.isFile() || !entry.name.endsWith(".d.ts")) {
+    continue;
+  }
+  const sourcePath = path.resolve("dist", entry.name);
+  const declarationPath = path.join(
+    root,
+    entry.name.replace(/\.d\.ts$/, ".d.cts"),
+  );
+  const source = fs
+    .readFileSync(sourcePath, "utf8")
+    .replace(/from "(\.\/[^"]+)\.js"/g, 'from "$1.cjs"');
+  fs.writeFileSync(declarationPath, source);
+
+  const mapPath = `${sourcePath}.map`;
+  if (fs.existsSync(mapPath)) {
+    fs.copyFileSync(
+      mapPath,
+      path.join(root, entry.name.replace(/\.d\.ts$/, ".d.cts.map")),
+    );
+  }
+}
