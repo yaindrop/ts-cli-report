@@ -11,20 +11,24 @@
   },
   "files": [
     "dist",
+    "dist-cjs",
     "README.md",
     "LICENSE"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist-cjs/index.cjs"
     }
   },
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm run build:esm && pnpm run build:cjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node scripts/rename-cjs-output.mjs",
+    "build:esm": "tsc -p tsconfig.build.json",
     "check": "pnpm run typecheck && pnpm run test",
-    "clean": "node -e \"import('node:fs').then(fs => { fs.rmSync('dist', { recursive: true, force: true }); fs.rmSync('dist-test', { recursive: true, force: true }); })\"",
+    "clean": "node -e \"import('node:fs').then(fs => { fs.rmSync('dist', { recursive: true, force: true }); fs.rmSync('dist-cjs', { recursive: true, force: true }); fs.rmSync('dist-test', { recursive: true, force: true }); })\"",
     "test": "pnpm run build && tsc -p tsconfig.test.json && node --test dist-test/test/**/*.test.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
