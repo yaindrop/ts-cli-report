@@ -13,8 +13,12 @@ function printable(value: TableCell): string {
   return String(value);
 }
 
+function visibleLength(value: string): number {
+  return value.replace(/\u001b\[[0-9;]*m/g, "").length;
+}
+
 function padRight(value: string, width: number): string {
-  return value.padEnd(width, " ");
+  return `${value}${" ".repeat(Math.max(0, width - visibleLength(value)))}`;
 }
 
 export function table(rows: readonly TableRow[], options: TableOptions = {}): string {
@@ -27,7 +31,10 @@ export function table(rows: readonly TableRow[], options: TableOptions = {}): st
       a.localeCompare(b),
     );
   const widths = columns.map((column) =>
-    Math.max(column.length, ...rows.map((row) => printable(row[column]).length)),
+    Math.max(
+      column.length,
+      ...rows.map((row) => visibleLength(printable(row[column]))),
+    ),
   );
   const renderRow = (values: readonly string[]): string =>
     values.map((value, index) => padRight(value, widths[index] ?? 0)).join("  ");

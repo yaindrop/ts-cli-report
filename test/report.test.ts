@@ -54,6 +54,15 @@ test("table renders stable columns", () => {
   );
 });
 
+test("table ignores ANSI escape codes when measuring columns", () => {
+  assert.equal(
+    table([{ status: "\u001b[32mok\u001b[39m", next: "value" }], {
+      columns: ["status", "next"],
+    }),
+    ["status  next ", "------  -----", "\u001b[32mok\u001b[39m      value"].join("\n"),
+  );
+});
+
 test("runAudit throws AuditFailure with issues", async () => {
   const { reporter, stderr, stdout } = memoryReporter();
   await assert.rejects(

@@ -7,8 +7,11 @@ function printable(value) {
     }
     return String(value);
 }
+function visibleLength(value) {
+    return value.replace(/\u001b\[[0-9;]*m/g, "").length;
+}
 function padRight(value, width) {
-    return value.padEnd(width, " ");
+    return `${value}${" ".repeat(Math.max(0, width - visibleLength(value)))}`;
 }
 function table(rows, options = {}) {
     if (rows.length === 0) {
@@ -16,7 +19,7 @@ function table(rows, options = {}) {
     }
     const columns = options.columns ??
         [...new Set(rows.flatMap((row) => Object.keys(row)))].sort((a, b) => a.localeCompare(b));
-    const widths = columns.map((column) => Math.max(column.length, ...rows.map((row) => printable(row[column]).length)));
+    const widths = columns.map((column) => Math.max(column.length, ...rows.map((row) => visibleLength(printable(row[column])))));
     const renderRow = (values) => values.map((value, index) => padRight(value, widths[index] ?? 0)).join("  ");
     return [
         renderRow(columns),
